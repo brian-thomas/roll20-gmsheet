@@ -58,17 +58,24 @@ on('ready', () => {
     //! Other Attributes
     output = '';
     const cid = cid2.id;
-    const hp = parseInt(resolveAttr(cid, 'hp').current, 10);
-    const maxhp = parseInt(resolveAttr(cid, 'hp').max, 10);
+    const hp = parseInt(resolveAttr(cid, 'hit_points').current, 10);
+    const maxhp = parseInt(resolveAttr(cid, 'hit_points').max, 10);
     const hpdown = maxhp - hp;
     const hppercentage = Math.floor(((100 * hp) / maxhp) / 5) * 5;
-    output = `<br><small><i>${resolveAttr(cid, 'race').current} Lvl ${resolveAttr(cid, 'level').current} ${resolveAttr(cid, 'class').current}</i></small>`;
+    const level  = parseInt(resolveAttr(cid, 'level').current, 0);
+    const xp = parseInt(resolveAttr(cid, 'xp').current, 0);
+    const level2  = parseInt(resolveAttr(cid, 'level2').current, 0);
+
+    output = `<br><small><i>${resolveAttr(cid, 'race').current} Lvl ${level} ${resolveAttr(cid, 'class').current}</i></small>`;
+    if (level2 > 0) {
+      output += `<br><small><i>Lvl ${level2} ${resolveAttr(cid, 'class2').current}</i></small>`;
+    }
+    output += `<br><small><i>XP: ${xp}</i></small>`;
     output += (resolveAttr(cid, 'inspiration').current === 'on' ? " <strong style='color:white;text-shadow: 2px 2px 4px #009000;' title='Character has inspiration!'>&#127775;</strong>" : '');
     output += `<br><br><strong>HP:</strong> ${hp}/${maxhp} `;
     output += (hp < maxhp ? ` <small style='color:#9d0a0e' title='down by ${hpdown} points, (${hppercentage}%) '>&#129301; ${hppercentage}% (-${hpdown} HP)</small> ` : '');
-    output += (parseInt(resolveAttr(cid, 'hp_temp').current, 10) > 0 ? ` <span style='color:green'>+ ${resolveAttr(cid, 'hp_temp').current} TMP</span>` : '');
     output += `<br><strong>AC:</strong> ${resolveAttr(cid, 'ac').current}`;
-    output += `<br><br>Speed: ${resolveAttr(cid, 'speed').current} ft, Passive Perception: ${resolveAttr(cid, 'passive_wisdom').current}<br>Initiative bonus: ${resolveAttr(cid, 'initiative_bonus').current > 0 ? `+${resolveAttr(cid, 'initiative_bonus').current}` : resolveAttr(cid, 'initiative_bonus').current}, Proficiency ${resolveAttr(cid, 'pb').current > 0 ? `+${resolveAttr(cid, 'pb').current}` : resolveAttr(cid, 'pb').current}`;
+    output += `<br><br>Move: ${resolveAttr(cid, 'movement_rate').current} ft/rnd, Passive Perception: ${resolveAttr(cid, 'perception').current}<br>Initiative bonus: ${resolveAttr(cid, 'initiative').current > 0 ? `+${resolveAttr(cid, 'initiative_bonus').current}` : resolveAttr(cid, 'initiative_bonus').current}, Proficiency ${resolveAttr(cid, 'pb').current > 0 ? `+${resolveAttr(cid, 'pb').current}` : resolveAttr(cid, 'pb').current}`;
     output += '<br><br>';
     return output;
   };
