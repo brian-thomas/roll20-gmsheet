@@ -47,7 +47,7 @@ on('ready', () => {
         output += '</tr><tr>';
         columnjumper = 0;
       } else {
-        columnjumper = 1;
+        columnjumper = 2;
       }
     });
     output += '</tr></table>';
@@ -77,6 +77,32 @@ on('ready', () => {
     output += `<br><strong>AC:</strong> ${resolveAttr(cid, 'ac').current}`;
     output += `<br><br>Move: ${resolveAttr(cid, 'movement_rate').current} ft/rnd, Passive Perception: ${resolveAttr(cid, 'perception').current}<br>Initiative bonus: ${resolveAttr(cid, 'initiative').current > 0 ? `+${resolveAttr(cid, 'initiative_bonus').current}` : resolveAttr(cid, 'initiative_bonus').current}, Proficiency ${resolveAttr(cid, 'pb').current > 0 ? `+${resolveAttr(cid, 'pb').current}` : resolveAttr(cid, 'pb').current}`;
     output += '<br><br>';
+    return output;
+  };
+
+  // output for CSV
+  const getCharSimpleAtt = (cid2) => {
+    output = '';
+    const cid = cid2.id;
+    const hp = parseInt(resolveAttr(cid, 'hit_points').current, 10);
+    const maxhp = parseInt(resolveAttr(cid, 'hit_points').max, 10);
+    const c_class = resolveAttr(cid, 'class').current;
+    const level  = parseInt(resolveAttr(cid, 'level').current, 0);
+
+    const c_class2 = resolveAttr(cid, 'class2').current;
+    const level2  = parseInt(resolveAttr(cid, 'level2').current, 0);
+
+    const move = parseInt(resolveAttr(cid, 'movement_rate').max, 10);
+    const xp = parseInt(resolveAttr(cid, 'xp').current, 0);
+    const purse = resolveAttr(cid, 'purse_items').current.replace(/(\r\n|\n|\r)/gm,' ').replace(/,/gm," ");
+
+    myoutput = `<br><div style='display:inline-block;'>Name,Class/Lvl,Xp,Hp,Move</div>`;
+    if (level2 > 0) {
+      output += `${c_class}/${level} ${c_class2}/${level2},${xp},${hp}/${maxhp},${move},${purse}`;
+    } else {
+      output += `${c_class}/${level},${xp},${hp}/${maxhp},${move},${purse}`;
+    }
+
     return output;
   };
 
@@ -130,11 +156,19 @@ on('ready', () => {
     if (msg.content.includes('-help') || msg.content.includes('-h')) {
       //! Help
       sendChat(scname, `/w gm %%README%%`); // eslint-disable-line quotes
+
     } else if (msg.selected == null) {
       sendChat(scname, '/w gm **ERROR:** You need to select at least one character.');
 
       /* will add a routine to save/load characters later */
     } else {
+
+      const csv_output = (msg.content.includes('-table') || msg.content.includes('-t'));
+
+      if (csv_output) {
+        myoutput = `<br><div style='display:inline-block;'><small>Name,Class/Lvl,Xp,Hp,Move,Purse</small></div>`;
+      }
+
       msg.selected.forEach((obj) => {
         //! Output
         const token = getObj('graphic', obj._id); // eslint-disable-line no-underscore-dangle
@@ -146,8 +180,15 @@ on('ready', () => {
           /* get the attributes and assemble the output */
           const charname = character.get('name');
           const charicon = character.get('avatar');
+
           if (myoutput.length > 0) myoutput += '<br>';
-          myoutput += `<div style='display:inline-block; font-variant: small-caps; color:##9d0a0e; font-size:1.8em;margin-top:5px;'><img src='${charicon}' style='height:48px;width:auto;margin-right:5px;margin-bottom:0px;margin-top:5px; vertical-align:middle'>${charname}</div>${getCharOtherAtt(character)}${getCharMainAtt(character)}${getSpellSlots(character)}`;
+
+          // If CSV make a table
+          if (csv_output) {
+            myoutput += `<div style='display:inline-block;'><small>${charname},${getCharSimpleAtt(character)}</small></div>`;
+          } else {
+            myoutput += `<div style='display:inline-block; font-variant: small-caps; color:##9d0a0e; font-size:1.8em;margin-top:5px;'><img src='${charicon}' style='height:48px;width:auto;margin-right:5px;margin-bottom:0px;margin-top:5px; vertical-align:middle'>${charname}</div>${getCharOtherAtt(character)}${getCharMainAtt(character)}${getSpellSlots(character)}`;
+          }
         }
       });
       sendChat(scname, `/w gm <div style='border:1px solid black; background-color: #f9f7ec; padding:8px; border-radius: 6px; font-size:0.85em;line-height:0.95em;'>${myoutput}</div>`); // eslint-disable-line quotes
